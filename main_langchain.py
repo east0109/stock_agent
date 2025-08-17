@@ -18,6 +18,12 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from langchain_agent import LangChainStockAgent
 from config import OPENAI_API_KEY
 
+# Global variable to control tool execution details display
+show_tool_details = True
+
+# Global variable to control AI response display
+show_ai_response = True
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,7 +61,11 @@ def print_help():
     print("- 'tools': Show available tools")
     print("- 'history': Show conversation history")
     print("- 'clear': Clear conversation memory")
+    print("- 'toggle_details': Toggle tool execution details on/off")
+    print("- 'toggle_ai_response': Toggle AI response display on/off")
     print("- 'quit' or 'exit': Exit the program")
+    print("\n💡 Tip: Use 'toggle_details' to reduce output duplication when tools return formatted data")
+    print("💡 Tip: Use 'toggle_ai_response' to hide AI responses that just repeat tool output")
     print("=" * 80)
 
 def print_results(result: dict) -> None:
@@ -67,21 +77,61 @@ def print_results(result: dict) -> None:
     print("\n📊 Analysis Results:")
     print("-" * 40)
 
-    # Print the main output
-    print(f"🤖 AI Response:")
-    print(result.get('output', 'No output'))
-
-    # Print intermediate steps if available
+    # Get the main output and intermediate steps
+    main_output = result.get('output', 'No output')
     intermediate_steps = result.get('intermediate_steps', [])
+
+    # Check if the main output is just duplicating tool output
+    is_duplicate_output = False
     if intermediate_steps:
+        for step in intermediate_steps:
+            tool_output = str(step[1])
+            # If the main output is essentially the same as tool output, mark as duplicate
+            if (len(tool_output) > 50 and
+                len(main_output) > 50):
+                # Clean both outputs for comparison (remove whitespace, newlines)
+                clean_tool = tool_output.replace('\n', ' ').replace(' ', '').strip()
+                clean_main = main_output.replace('\n', ' ').replace(' ', '').strip()
+
+                # Check if tool output is contained in main output (allowing for agent additions)
+                if clean_tool in clean_main and len(clean_tool) > len(clean_main) * 0.7:
+                    is_duplicate_output = True
+                    break
+
+                # Also check for specific tool signatures (like stock price tables)
+                if ("📊 Stock Prices for" in tool_output and
+                    "📊 Stock Prices for" in main_output and
+                    len(tool_output) > 100):
+                    is_duplicate_output = True
+                    break
+
+    # Only show the main output if it's not a duplicate
+    if not is_duplicate_output and show_ai_response:
+        print(f"🤖 AI Response:")
+        print(main_output)
+    elif is_duplicate_output and show_ai_response:
+        print(f"🤖 AI Response: [Tool output presented directly - no additional formatting]")
+        print(f"💡 Tip: Use 'toggle_ai_response' to hide this section when tools return formatted data")
+    elif not show_ai_response:
+        print(f"🤖 AI Response: [Hidden - use 'toggle_ai_response' to show]")
+
+    # Print intermediate steps if available, but be smart about it
+    if intermediate_steps and show_tool_details:
         print(f"\n🔧 Tool Execution Steps ({len(intermediate_steps)}):")
         print("-" * 40)
+        print("  Note: Tool outputs are truncated to avoid duplication with the main response above.")
         for i, step in enumerate(intermediate_steps, 1):
             action = step[0]
             observation = step[1]
             print(f"  {i}. Tool: {action.tool}")
             print(f"     Input: {action.tool_input}")
-            print(f"     Output: {str(observation)[:100]}...")
+
+            # Only show a preview of tool output to avoid duplication
+            tool_output = str(observation)
+            if len(tool_output) > 100:
+                print(f"     Output: {tool_output[:100]}...")
+            else:
+                print(f"     Output: {tool_output}")
 
     # Print chat history if available
     chat_history = result.get('chat_history', [])
@@ -152,6 +202,18 @@ def main():
                 elif user_input.lower() == 'clear':
                     agent.clear_memory()
                     print("🧹 Conversation memory cleared!")
+                    continue
+                elif user_input.lower() == 'toggle_details':
+                    global show_tool_details
+                    show_tool_details = not show_tool_details
+                    status = "ON" if show_tool_details else "OFF"
+                    print(f"🔧 Tool execution details: {status}")
+                    continue
+                elif user_input.lower() == 'toggle_ai_response':
+                    global show_ai_response
+                    show_ai_response = not show_ai_response
+                    status = "ON" if show_ai_response else "OFF"
+                    print(f"🤖 AI response display: {status}")
                     continue
 
                 # Process the request
