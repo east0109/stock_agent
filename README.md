@@ -1,55 +1,67 @@
 # Stock Analyzer AI - Modular System
 
-An intelligent stock analysis system that uses OpenAI's API to parse natural language prompts and automatically execute technical analysis tools. The system has been refactored into a modular architecture for better maintainability and extensibility.
+An intelligent stock analysis system that uses OpenAI's GPT-5 API to parse natural language prompts and automatically execute technical analysis tools. The system features a clean, modular architecture with enhanced data display and comprehensive error handling.
 
 ## 🏗️ Architecture
 
-The system is now organized into several focused modules:
+The system is organized into focused, maintainable modules:
 
 - **`config.py`** - Centralized configuration and environment variables
-- **`data_fetcher.py`** - Stock data retrieval from Polygon.io API
-- **`technical_indicators.py`** - Technical analysis calculations (RSI, Moving Averages, Bollinger Bands, MACD)
-- **`prompt_parser.py`** - OpenAI prompt parsing and execution planning
-- **`stock_agent.py`** - Main agent that orchestrates the analysis
-- **`main.py`** - Interactive user interface for custom prompts
+- **`data_fetcher.py`** - Stock data retrieval from Polygon.io API with smart fallbacks
+- **`technical_indicators.py`** - Technical analysis calculations (RSI, Moving Averages, Bollinger Bands, MACD, Average Price)
+- **`prompt_parser.py`** - OpenAI GPT-5 prompt parsing and execution planning
+- **`stock_agent.py`** - Main agent that orchestrates the analysis workflow
+- **`main.py`** - Interactive user interface with enhanced data display
 - **`demo.py`** - Programmatic demonstration of the system
-- **`test_agent.py`** - Test suite
+- **`test_agent.py` - Comprehensive test suite for all modules
 
 ## 🚀 Features
 
 - **Natural Language Processing**: Use plain English to request stock analysis
+- **GPT-5 Integration**: Latest OpenAI model for intelligent prompt parsing
 - **Modular Design**: Clean separation of concerns for easy maintenance
-- **Extensible**: Easy to add new technical indicators or data sources
-- **Comprehensive Analysis**: Supports multiple technical indicators
-- **User-Friendly**: Interactive interface for custom prompts
-- **Robust Error Handling**: Graceful handling of API failures and invalid inputs
+- **Smart Data Fetching**: Automatic fallback from 1d to 5d for recent data
+- **Enhanced Display**: Rich data previews with first/last rows for DataFrames
+- **Comprehensive Analysis**: Multiple technical indicators with proper data validation
+- **User-Friendly**: Interactive interface with helpful commands and examples
+- **Robust Error Handling**: Graceful handling of API failures and insufficient data
 
 ## 📊 Available Tools
 
-- **Data Fetching**: Get stock data for any ticker and time period
-- **RSI**: Relative Strength Index calculation
-- **Moving Averages**: Simple Moving Average with configurable periods
-- **Bollinger Bands**: Volatility and trend analysis
-- **MACD**: Moving Average Convergence Divergence indicator
+- **`fetch_stock_data`**: Get stock data for any ticker and time period
+- **`calculate_rsi`**: Relative Strength Index calculation (requires sufficient data)
+- **`calculate_moving_average`**: Simple Moving Average with configurable periods
+- **`calculate_bollinger_bands`**: Volatility and trend analysis
+- **`calculate_macd`**: Moving Average Convergence Divergence indicator
+- **`calculate_average_price`**: Simple average of closing prices (works with any data amount)
 
 ## ⏰ Supported Time Periods
 
-- 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
+- **1d, 5d** - Recent data (weekends/holidays excluded)
+- **1mo, 3mo, 6mo** - Short to medium term analysis
+- **1y, 2y, 5y, 10y** - Long term analysis
+- **ytd, max** - Year-to-date and maximum available data
 
 ## 🛠️ Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
 ```bash
-git clone https://github.com/east0109/stock_agent.git
+git clone <repository-url>
 cd stock_analyzer_ai
 ```
 
-2. Install dependencies:
+2. **Create virtual environment:**
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables:
+4. **Set up environment variables:**
 ```bash
 cp env_example.txt .env
 # Edit .env with your API keys
@@ -57,7 +69,7 @@ cp env_example.txt .env
 
 ## 🔑 Required API Keys
 
-- **OpenAI API Key**: For natural language prompt parsing
+- **OpenAI API Key**: For GPT-5 natural language prompt parsing
 - **Polygon.io API Key**: For stock data retrieval
 
 ## 💻 Usage
@@ -70,10 +82,19 @@ Run the interactive interface for custom prompts:
 python main.py
 ```
 
-Example prompts:
+**Available Commands:**
+- `help` - Show available tools and examples
+- `tools` - List all technical analysis tools
+- `periods` - Show supported time periods
+- `examples` - Display example prompts
+- `quit` or `exit` - Exit the program
+
+**Example Prompts:**
 - "Get me Tesla stock for last month and calculate RSI"
 - "Fetch Apple stock data for 3 months and calculate moving average with period 20"
 - "Get Microsoft stock for last year and calculate Bollinger Bands"
+- "Show me NVIDIA's last month stock prices, the RSI and the MACD"
+- "Give me this week's stock price for Tesla and its average"
 
 ### Programmatic Usage
 
@@ -90,6 +111,10 @@ result = agent.analyze("Get me NVIDIA stock for last 6 months and calculate RSI"
 if 'error' not in result:
     print("Analysis successful!")
     print(f"Results: {list(result['results'].keys())}")
+    
+    # Access specific results
+    stock_data = result['results']['result_of_fetch_stock_data']
+    rsi_values = result['results']['result_of_calculate_rsi']
 else:
     print(f"Error: {result['error']}")
 ```
@@ -104,7 +129,7 @@ python demo.py
 
 ### Testing
 
-Run the test suite:
+Run the comprehensive test suite:
 
 ```bash
 python test_agent.py
@@ -129,16 +154,17 @@ python test_agent.py
 ```
 stock_analyzer_ai/
 ├── config.py              # Configuration and environment variables
-├── data_fetcher.py        # Stock data retrieval
+├── data_fetcher.py        # Stock data retrieval with smart fallbacks
 ├── technical_indicators.py # Technical analysis calculations
-├── prompt_parser.py       # OpenAI prompt parsing
+├── prompt_parser.py       # OpenAI GPT-5 prompt parsing
 ├── stock_agent.py         # Main analysis agent
-├── main.py                # Interactive user interface
+├── main.py                # Interactive user interface with enhanced display
 ├── demo.py                # Demonstration script
-├── test_agent.py          # Test suite
+├── test_agent.py          # Comprehensive test suite
 ├── requirements.txt        # Python dependencies
 ├── setup.py               # Package setup
 ├── .env                   # Environment variables (create from env_example.txt)
+├── .gitignore             # Git ignore rules (protects API keys)
 └── README.md              # This file
 ```
 
@@ -147,10 +173,10 @@ stock_analyzer_ai/
 The system includes comprehensive tests for each module:
 
 - Configuration module tests
-- Data fetcher functionality
-- Technical indicator calculations
-- Prompt parser validation
-- Main agent integration
+- Data fetcher functionality with fallback logic
+- Technical indicator calculations with data validation
+- Prompt parser validation and error handling
+- Main agent integration and workflow
 - Modular import verification
 
 ## 🤝 Contributing
@@ -172,12 +198,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 1. **API Key Errors**: Ensure your `.env` file contains valid API keys
 2. **Import Errors**: Make sure all dependencies are installed with `pip install -r requirements.txt`
 3. **Data Fetching Failures**: Check your Polygon.io API key and internet connection
+4. **Empty RSI/MA Results**: Use longer periods (1mo+) for technical indicators that need more data
+5. **OpenAI Empty Responses**: The system automatically handles token limits and model compatibility
 
 ### Getting Help
 
 - Check the test output: `python test_agent.py`
 - Review the demo: `python demo.py`
 - Check logs for detailed error information
+- Use the interactive help: `python main.py` then type `help`
 
 ## 🔮 Future Enhancements
 
@@ -188,3 +217,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Machine learning-based predictions
 - Web interface
 - Mobile app support
+- Advanced charting and visualization
+- Historical performance tracking
