@@ -40,7 +40,7 @@ The system is now organized into several focused modules:
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/east0109/stock_agent.git
 cd stock_analyzer_ai
 ```
 
