@@ -1,39 +1,41 @@
-# Stock Analyzer AI - Modular System
+# Stock Analyzer AI - LangChain Agent System
 
-An intelligent stock analysis system that uses OpenAI's GPT-5 API to parse natural language prompts and automatically execute technical analysis tools. The system features a clean, modular architecture with enhanced data display and comprehensive error handling.
+An intelligent stock analysis system powered by LangChain and OpenAI's GPT models. The system uses natural language processing to automatically execute technical analysis tools through an intelligent agent that can understand complex requests and provide comprehensive stock analysis.
 
 ## 🏗️ Architecture
 
-The system is organized into focused, maintainable modules:
+The system is built around a modern LangChain agent architecture:
 
+- **`langchain_agent.py`** - Core LangChain agent with OpenAI integration
+- **`langchain_tools.py`** - Custom tools for stock analysis (RSI, Moving Averages, Bollinger Bands, MACD, etc.)
+- **`data_fetcher.py`** - Stock data retrieval from Polygon.io API
+- **`technical_indicators.py`** - Technical analysis calculations
+- **`main_langchain.py`** - Interactive user interface for the LangChain agent
 - **`config.py`** - Centralized configuration and environment variables
-- **`data_fetcher.py`** - Stock data retrieval from Polygon.io API with smart fallbacks
-- **`technical_indicators.py`** - Technical analysis calculations (RSI, Moving Averages, Bollinger Bands, MACD, Average Price)
-- **`prompt_parser.py`** - OpenAI GPT-5 prompt parsing and execution planning
-- **`stock_agent.py`** - Main agent that orchestrates the analysis workflow
-- **`main.py`** - Interactive user interface with enhanced data display
-- **`demo.py`** - Programmatic demonstration of the system
-- **`test_agent.py` - Comprehensive test suite for all modules
 
 ## 🚀 Features
 
 - **Natural Language Processing**: Use plain English to request stock analysis
-- **GPT-5 Integration**: Latest OpenAI model for intelligent prompt parsing
-- **Modular Design**: Clean separation of concerns for easy maintenance
-- **Smart Data Fetching**: Automatic fallback from 1d to 5d for recent data
-- **Enhanced Display**: Rich data previews with first/last rows for DataFrames
+- **LangChain Agent**: Intelligent tool orchestration and execution
+- **OpenAI Integration**: Latest GPT models for understanding complex requests
+- **Smart Data Fetching**: Automatic data retrieval with intelligent period selection
+- **Enhanced Display**: Rich, formatted tables for stock prices and analysis results
 - **Comprehensive Analysis**: Multiple technical indicators with proper data validation
-- **User-Friendly**: Interactive interface with helpful commands and examples
+- **User-Friendly Interface**: Interactive commands with helpful tips and examples
 - **Robust Error Handling**: Graceful handling of API failures and insufficient data
+- **Smart Output Control**: Eliminates duplicate output with intelligent detection
 
 ## 📊 Available Tools
 
+The LangChain agent has access to these specialized tools:
+
 - **`fetch_stock_data`**: Get stock data for any ticker and time period
-- **`calculate_rsi`**: Relative Strength Index calculation (requires sufficient data)
+- **`display_stock_prices`**: Show formatted tables of daily prices (open, close, or both)
+- **`calculate_rsi`**: Relative Strength Index calculation with intelligent period selection
 - **`calculate_moving_average`**: Simple Moving Average with configurable periods
 - **`calculate_bollinger_bands`**: Volatility and trend analysis
 - **`calculate_macd`**: Moving Average Convergence Divergence indicator
-- **`calculate_average_price`**: Simple average of closing prices (works with any data amount)
+- **`calculate_average_price`**: Average of closing prices over specified periods
 
 ## ⏰ Supported Time Periods
 
@@ -69,115 +71,100 @@ cp env_example.txt .env
 
 ## 🔑 Required API Keys
 
-- **OpenAI API Key**: For GPT-5 natural language prompt parsing
+- **OpenAI API Key**: For GPT model integration and natural language understanding
 - **Polygon.io API Key**: For stock data retrieval
 
 ## 💻 Usage
 
 ### Interactive Mode (Recommended)
 
-Run the interactive interface for custom prompts:
+Run the interactive LangChain agent interface:
 
 ```bash
-python main.py
+python main_langchain.py
 ```
 
 **Available Commands:**
 - `help` - Show available tools and examples
 - `tools` - List all technical analysis tools
-- `periods` - Show supported time periods
-- `examples` - Display example prompts
+- `history` - Show conversation history
+- `clear` - Clear conversation memory
+- `toggle_details` - Toggle tool execution details on/off
+- `toggle_ai_response` - Toggle AI response display on/off
 - `quit` or `exit` - Exit the program
 
 **Example Prompts:**
-- "Get me Tesla stock for last month and calculate RSI"
-- "Fetch Apple stock data for 3 months and calculate moving average with period 20"
-- "Get Microsoft stock for last year and calculate Bollinger Bands"
-- "Show me NVIDIA's last month stock prices, the RSI and the MACD"
-- "Give me this week's stock price for Tesla and its average"
+- "Show me Tesla's stock prices for the last 30 days"
+- "Display Apple's open and close prices for the past month"
+- "Get NVIDIA stock data and calculate RSI for the last 3 months"
+- "Calculate moving average with period 20 for Microsoft stock over 6 months"
+- "Show me Tesla's stock prices for each day for the last 30 days"
 
 ### Programmatic Usage
 
 ```python
-from stock_agent import StockAnalysisAgent
+from langchain_agent import LangChainStockAgent
 
 # Initialize the agent
-agent = StockAnalysisAgent()
+agent = LangChainStockAgent()
 
 # Analyze with custom prompt
-result = agent.analyze("Get me NVIDIA stock for last 6 months and calculate RSI")
+result = agent.analyze("Show me Tesla's stock prices for the last month")
 
 # Check results
-if 'error' not in result:
+if result.get('success', False):
     print("Analysis successful!")
-    print(f"Results: {list(result['results'].keys())}")
-
-    # Access specific results
-    stock_data = result['results']['result_of_fetch_stock_data']
-    rsi_values = result['results']['result_of_calculate_rsi']
+    print(f"Output: {result.get('output', 'No output')}")
 else:
-    print(f"Error: {result['error']}")
+    print(f"Error: {result.get('error', 'Unknown error')}")
 ```
 
-### Demo Mode
+## 🔧 Smart Features
 
-Run the demonstration script:
+### Intelligent Period Selection
+- **RSI/MA/BB**: Automatically defaults to 1 month if no period specified
+- **MACD**: Intelligently suggests 3+ months for optimal calculation
+- **Data Validation**: Checks if requested periods have sufficient data
 
-```bash
-python demo.py
-```
+### Smart Output Control
+- **Duplicate Detection**: Automatically identifies when agent repeats tool output
+- **Clean Display**: Eliminates triple output issues with intelligent formatting
+- **User Control**: Toggle commands to customize what information is shown
 
-### Testing
-
-Run the comprehensive test suite:
-
-```bash
-python test_agent.py
-```
-
-## 🔧 Adding New Features
-
-### New Technical Indicators
-
-1. Add the calculation method to `technical_indicators.py`
-2. Update the tool descriptions in `prompt_parser.py`
-3. Register the tool in `stock_agent.py`
-
-### New Data Sources
-
-1. Create a new data fetcher class
-2. Implement the `fetch_stock_data` method
-3. Update the main agent to use the new fetcher
+### Flexible Input Parsing
+- **Multiple Formats**: Handles pipe (|), colon (:), comma (,), and space-separated arguments
+- **Smart Defaults**: Automatically fills in missing parameters
+- **Error Recovery**: Graceful handling of malformed requests
 
 ## 📁 File Structure
 
 ```
 stock_analyzer_ai/
-├── config.py              # Configuration and environment variables
-├── data_fetcher.py        # Stock data retrieval with smart fallbacks
+├── langchain_agent.py      # Core LangChain agent implementation
+├── langchain_tools.py      # Custom tools for stock analysis
+├── main_langchain.py       # Interactive user interface
+├── data_fetcher.py         # Stock data retrieval
 ├── technical_indicators.py # Technical analysis calculations
-├── prompt_parser.py       # OpenAI GPT-5 prompt parsing
-├── stock_agent.py         # Main analysis agent
-├── main.py                # Interactive user interface with enhanced display
-├── demo.py                # Demonstration script
-├── test_agent.py          # Comprehensive test suite
+├── config.py               # Configuration and environment variables
 ├── requirements.txt        # Python dependencies
-├── setup.py               # Package setup
-├── .env                   # Environment variables (create from env_example.txt)
-├── .gitignore             # Git ignore rules (protects API keys)
-└── README.md              # This file
+├── setup.py                # Package setup
+├── .env                    # Environment variables (create from env_example.txt)
+├── .gitignore              # Git ignore rules (protects API keys)
+└── README.md               # This file
 ```
 
 ## 🧪 Testing
 
-The system includes comprehensive tests for each module:
+Test individual tools and the complete system:
 
-- Configuration module tests
-- Data fetcher functionality with fallback logic
-- Technical indicator calculations with data validation
-- Prompt parser validation and error handling
-- Main agent integration and workflow
-- Modular import verification
+```bash
+# Test specific tools
+python -c "from langchain_tools import get_all_tools; tools = get_all_tools(); print(f'Found {len(tools)} tools')"
+
+# Test the agent
+python main_langchain.py
+# Then try: "Show me Tesla's stock prices for the last week"
+```
 
 ## 🤝 Contributing
 
@@ -198,15 +185,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 1. **API Key Errors**: Ensure your `.env` file contains valid API keys
 2. **Import Errors**: Make sure all dependencies are installed with `pip install -r requirements.txt`
 3. **Data Fetching Failures**: Check your Polygon.io API key and internet connection
-4. **Empty RSI/MA Results**: Use longer periods (1mo+) for technical indicators that need more data
-5. **OpenAI Empty Responses**: The system automatically handles token limits and model compatibility
+4. **Empty Results**: Use longer periods (1mo+) for technical indicators that need more data
+5. **Duplicate Output**: Use `toggle_ai_response` to hide redundant AI responses
 
 ### Getting Help
 
-- Check the test output: `python test_agent.py`
-- Review the demo: `python demo.py`
+- Check the interactive help: `python main_langchain.py` then type `help`
+- Use toggle commands to control output: `toggle_details` and `toggle_ai_response`
+- Review tool execution steps for debugging
 - Check logs for detailed error information
-- Use the interactive help: `python main.py` then type `help`
 
 ## 🔮 Future Enhancements
 
@@ -219,3 +206,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Mobile app support
 - Advanced charting and visualization
 - Historical performance tracking
+- Enhanced natural language understanding for complex queries
