@@ -111,7 +111,7 @@ result = agent.analyze("Get me NVIDIA stock for last 6 months and calculate RSI"
 if 'error' not in result:
     print("Analysis successful!")
     print(f"Results: {list(result['results'].keys())}")
-    
+
     # Access specific results
     stock_data = result['results']['result_of_fetch_stock_data']
     rsi_values = result['results']['result_of_calculate_rsi']
